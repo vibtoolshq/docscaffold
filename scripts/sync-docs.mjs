@@ -552,7 +552,11 @@ async function syncProject(
         repoRootForMetadata =
           registryEntry.localPath === "." ? projectRoot : null;
       }
-    } else if (candidateDerivedSlug === "vib-docs-engine") {
+    } else if (
+      candidateDerivedSlug === "docscaffold" &&
+      typeof registryEntry.repoUrl === "string" &&
+      /^https:\/\/github\.com\/vibtoolshq\/docscaffold(?:\.git)?\/?$/i.test(registryEntry.repoUrl.trim())
+    ) {
       const selfVibtools = await readVibtoolsConfigFromRoot(
         projectRoot,
         vibtoolsHelpers,
