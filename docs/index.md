@@ -1,7 +1,7 @@
 ---
 title: Vib Docs Engine
 description: A static multi-product documentation engine with zero-touch .vibtools/ auto-discovery and AI-readable documentation endpoints.
-version: "0.1.0"
+version: "v1.0.0"
 ---
 
 > Public template note: the shipped registry contains only this public engine. Configure any external documentation repositories deliberately.

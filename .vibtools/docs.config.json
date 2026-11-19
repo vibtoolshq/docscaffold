@@ -6,7 +6,7 @@
   "title": "DocScaffold",
   "category": "Documentation Engines",
   "description": "Open-source static multi-repository documentation engine.",
-  "version": "0.1.0",
+  "version": "v1.0.0",
   "accentColor": "#7C3AED",
   "docsPath": "docs",
   "logoPath": ".vibtools/logo.png",

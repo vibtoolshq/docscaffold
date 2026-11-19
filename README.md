@@ -4,6 +4,8 @@
 
 This is the public, engine-only distribution of Vib Docs Engine, maintained by [Vib Tools](https://vib.tools/).
 
+**Stable release:** [v1.0.0](https://github.com/vibtoolshq/docscaffold/releases/tag/v1.0.0).
+
 ## Features
 
 - Multi-project documentation hub with user and developer portal presets

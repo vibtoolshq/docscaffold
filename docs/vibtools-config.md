@@ -1,7 +1,7 @@
 ---
 title: ".vibtools/ Configuration"
 description: "Complete AI-agent and developer specification for .vibtools/docs.config.json, dual-portal targets, docs/ folder structure, frontmatter rules, and JSON Schema."
-version: "0.1.0"
+version: "v1.0.0"
 ---
 
 # `.vibtools/` & `docs/` Repository Specification (Developer & AI Agent Reference)
