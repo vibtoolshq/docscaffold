@@ -1,14 +1,14 @@
 ---
-title: Vib Docs Engine
+title: DocScaffold
 description: A static multi-product documentation engine with zero-touch .vibtools/ auto-discovery and AI-readable documentation endpoints.
 version: "v1.0.0"
 ---
 
 > Public template note: the shipped registry contains only this public engine. Configure any external documentation repositories deliberately.
 
-# Vib Docs Engine — Operator & AI Agent Guide
+# DocScaffold — Operator & AI Agent Guide
 
-`vib-docs-engine` builds static documentation portals for multiple products (`https://docs.vib.tools` for end-user product docs and `https://developer.vibtools.io` for open-source/developer docs). During a build, the engine inspects each product repository's `.vibtools/docs.config.json` (or `.vibtools/config.docs.json`) via 2-step Git sparse checkout, validates and normalizes Markdown/MDX documentation from the configured `docsPath`, generates the portal manifest and sidebar tree, builds Astro static HTML + raw `.md` + `llms.txt` routes, and indexes all articles with Pagefind.
+`DocScaffold` builds static documentation portals for multiple products (`https://docs.vib.tools` for end-user product docs and `https://developer.vibtools.io` for open-source/developer docs). During a build, the engine inspects each product repository's `.vibtools/docs.config.json` (or `.vibtools/config.docs.json`) via 2-step Git sparse checkout, validates and normalizes Markdown/MDX documentation from the configured `docsPath`, generates the portal manifest and sidebar tree, builds Astro static HTML + raw `.md` + `llms.txt` routes, and indexes all articles with Pagefind.
 
 ---
 
@@ -19,11 +19,11 @@ If you are an **AI coding agent** (or developer) asked to configure `.vibtools/`
 | Resource | Path | Format & Purpose |
 | :--- | :--- | :--- |
 | **JSON Schema (Canonical)** | `/schemas/vibtools-docs.schema.json` | Draft 2020-12 JSON Schema for `.vibtools/docs.config.json` & `.vibtools/config.docs.json` |
-| **`.vibtools/` & `docs/` Full Spec (HTML)** | `/vib-docs-engine/vibtools-config/` | Complete human & AI specification for `.vibtools/` and `docs/` authoring |
-| **`.vibtools/` & `docs/` Full Spec (Raw Markdown)** | `/vib-docs-engine/vibtools-config.md` | Raw YAML-free Markdown of the complete `.vibtools/` + `docs/` specification |
-| **Adding Projects Guide (Raw Markdown)** | `/vib-docs-engine/adding-projects.md` | Repository registration (`config/projects.json`) & webhook setup |
-| **Deployment Guide (Raw Markdown)** | `/vib-docs-engine/deployment.md` | Dual-portal Cloudflare Pages & Docker/Nginx deployment |
-| **Product AI Bundle (`vib-docs-engine`)** | `/vib-docs-engine/llms.txt` | Complete concatenated Markdown for all `vib-docs-engine` guides in one request |
+| **`.vibtools/` & `docs/` Full Spec (HTML)** | `/docscaffold/vibtools-config/` | Complete human & AI specification for `.vibtools/` and `docs/` authoring |
+| **`.vibtools/` & `docs/` Full Spec (Raw Markdown)** | `/docscaffold/vibtools-config.md` | Raw YAML-free Markdown of the complete `.vibtools/` + `docs/` specification |
+| **Adding Projects Guide (Raw Markdown)** | `/docscaffold/adding-projects.md` | Repository registration (`config/projects.json`) & webhook setup |
+| **Deployment Guide (Raw Markdown)** | `/docscaffold/deployment.md` | Dual-portal Cloudflare Pages & Docker/Nginx deployment |
+| **Product AI Bundle (`vib-docs-engine`)** | `/docscaffold/llms.txt` | Complete concatenated Markdown for all `vib-docs-engine` guides in one request |
 | **Portal AI Directory** | `/llms.txt` | High-level index of all products, pages, raw `.md` URLs, and schema link on this portal |
 | **Full Portal AI Corpus** | `/llms-full.txt` | Complete Markdown corpus of every product and page hosted on this portal |
 
@@ -67,7 +67,7 @@ Read the full field-by-field contract and copy-paste templates in [`.vibtools/` 
 4. Run `npm run dev` to sync automatically, then start Astro's development server on `0.0.0.0:3000`.
 5. Run `npm run build` to sync, build Astro, and run Pagefind. Run `npm run verify` to execute the full post-build verifier (`scripts/verify-build.mjs`). `npm run preview` previews an existing Astro build on `0.0.0.0:3000`.
 
-The `predev` and `prebuild` lifecycle hooks run the sync script automatically. When syncing the engine's own `vib-docs-engine` record without remote Git credentials, `scripts/sync-docs.mjs` falls back to the in-repository `docs/` directory. `localPath` can also temporarily target a local folder (for example `./docs`) for an isolated sync test; keep it out of production config. Generated content and manifests are ignored build inputs and must not be hand-edited.
+The `predev` and `prebuild` lifecycle hooks run the sync script automatically. When syncing the engine's own `docscaffold` record without remote Git credentials, `scripts/sync-docs.mjs` falls back to the in-repository `docs/` directory. `localPath` can also temporarily target a local folder (for example `./docs`) for an isolated sync test; keep it out of production config. Generated content and manifests are ignored build inputs and must not be hand-edited.
 
 Press `Ctrl+K` (or `Cmd+K` on macOS) anywhere to open search. On a product page, search starts scoped to that product; switch to “All Docs” for portal-wide results. Hub searches are global.
 

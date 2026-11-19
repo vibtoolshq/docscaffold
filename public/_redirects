@@ -1,5 +1,7 @@
 # Cloudflare Pages Redirect Rules (relative paths or *.pages.dev only)
 # Custom domain redirects (e.g., docs.vibtools.io -> docs.vib.tools) must be configured
 # in Cloudflare Dashboard -> Rules -> Redirect Rules (see docs/deployment.md).
-# Example relative redirect:
-# /old-docs/* /vib-docs-engine/:splat 301
+# Legacy documentation routes preserved after DocScaffold slug correction.
+/vib-docs-engine /docscaffold/ 301
+/vib-docs-engine/ /docscaffold/ 301
+/vib-docs-engine/* /docscaffold/:splat 301

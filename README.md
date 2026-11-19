@@ -1,5 +1,7 @@
 # DocScaffold
 
+<img src="public/docscaffold-icon.svg" alt="DocScaffold icon" width="88" height="88" />
+
 **DocScaffold** is an open-source, configuration-driven documentation portal built with Astro, MDX, Tailwind CSS and Pagefind. It aggregates Markdown/MDX guides from separate Git repositories without bundling those projects' source code.
 
 This is the public, engine-only distribution of Vib Docs Engine, maintained by [Vib Tools](https://vib.tools/).

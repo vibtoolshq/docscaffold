@@ -3,7 +3,7 @@
   "portalSubtitle": "Documentation for developers.",
   "domain": "https://developer.example.com",
   "brandName": "DocScaffold",
-  "brandLogo": "/vib-tools-logo.png",
+  "brandLogo": "/docscaffold-icon.svg",
   "defaultAccent": "#7C3AED",
   "portalType": "developer",
   "navLinks": [

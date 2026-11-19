@@ -3,7 +3,7 @@
   "portalSubtitle": "Open-source documentation engine guides.",
   "domain": "https://docs.example.com",
   "brandName": "DocScaffold",
-  "brandLogo": "/vib-tools-logo.png",
+  "brandLogo": "/docscaffold-icon.svg",
   "defaultAccent": "#7C3AED",
   "portalType": "all",
   "navLinks": [
