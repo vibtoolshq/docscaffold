@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a reproducible problem in Vib Docs Engine
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provide only public-safe reproduction details. Never include credentials, tokens, private URLs, or personal data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Problem summary
+      description: Describe the incorrect behavior in one concise paragraph.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: List commands, configuration, and steps needed to reproduce the problem.
+      placeholder: |
+        1. Run `npm ci`
+        2. Configure...
+        3. Run...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include Node.js, npm, OS, deployment target, and relevant commit or version when known.
+      placeholder: Node.js 22, npm 10, Windows 11, commit abc1234
+    validations:
+      required: true

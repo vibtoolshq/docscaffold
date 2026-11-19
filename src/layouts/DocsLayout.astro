@@ -1,0 +1,115 @@
+---
+import type { MarkdownHeading } from "astro";
+import { ChevronRight } from "lucide-astro";
+import siteConfig from "../../config/site.config.json";
+import PrevNextNav from "../components/docs/PrevNextNav.astro";
+import Sidebar from "../components/docs/Sidebar.astro";
+import TableOfContents from "../components/docs/TableOfContents.astro";
+import Topbar from "../components/docs/Topbar.astro";
+import type { FlatPage, ManifestProject } from "../utils/manifest";
+import { routeToMarkdownPath } from "../utils/llms";
+import { buildDocJsonLd } from "../utils/seo";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  product: ManifestProject;
+  projects: ManifestProject[];
+  page: FlatPage;
+  pageTitle: string;
+  hasContentH1: boolean;
+  headings: MarkdownHeading[];
+  description?: string;
+  canonicalPath: string;
+}
+
+const { product, projects, page, pageTitle, hasContentH1, headings, description, canonicalPath } = Astro.props;
+const documentTitle = pageTitle === product.title ? pageTitle : `${pageTitle} — ${product.title}`;
+const sourceDirectories = page.source
+  .replace(/\\/g, "/")
+  .split("/")
+  .slice(0, -1)
+  .map((directory) => directory.replace(/^\d+[-_.\s]+/, "").replace(/[-_]+/g, " ").replace(/\b[a-z]/g, (letter) => letter.toUpperCase()));
+const jsonLdBreadcrumbs = [
+  { name: "Docs", item: "/" },
+  { name: product.title, item: `/${product.slug}/` },
+  ...sourceDirectories.map((directory) => ({ name: directory })),
+  ...(pageTitle !== product.title ? [{ name: pageTitle, item: canonicalPath }] : []),
+];
+const docJsonLd = buildDocJsonLd({
+  site: siteConfig,
+  product,
+  pageTitle,
+  description,
+  canonicalPath,
+  breadcrumbs: jsonLdBreadcrumbs,
+});
+const markdownAlternateHref = routeToMarkdownPath(page.route, product.slug);
+const productLlmsHref = `/${encodeURIComponent(product.slug)}/llms.txt`;
+const alternateLinks = [
+  {
+    type: "text/markdown",
+    title: `${pageTitle} (Markdown)`,
+    href: markdownAlternateHref,
+  },
+  {
+    type: "text/plain",
+    title: `${product.title} LLMs Index`,
+    href: productLlmsHref,
+  },
+];
+---
+
+<BaseLayout
+  title={documentTitle}
+  description={description || product.description}
+  accentColor={product.accentColor}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  structuredData={docJsonLd}
+  alternateLinks={alternateLinks}
+>
+  <div data-search-context data-product-slug={product.slug} data-product-title={product.title}>
+    <Topbar product={product} projects={projects} />
+    <div class="mx-auto flex w-full max-w-[1600px] flex-1">
+      <Sidebar product={product} currentPath={Astro.url.pathname} />
+
+      <main id="main-content" class="grid min-w-0 flex-1 grid-cols-1 xl:grid-cols-[minmax(0,1fr)_13rem]">
+        <div class="mx-auto w-full max-w-[740px] px-5 py-6 sm:px-8">
+          <nav class="mb-5 flex min-w-0 flex-wrap items-center gap-1 text-xs text-[var(--text-muted)]" aria-label="Breadcrumb" data-pagefind-ignore="all">
+            <a class="shrink-0 text-[var(--text-muted)] no-underline hover:text-[var(--text-primary)]" href="/">Docs</a>
+            <ChevronRight class="size-3 shrink-0" aria-hidden="true" />
+            <a class="shrink-0 text-[var(--text-muted)] no-underline hover:text-[var(--text-primary)]" href={`/${product.slug}/`}>{product.title}</a>
+            {sourceDirectories.map((directory) => (
+              <>
+                <ChevronRight class="size-3 shrink-0" aria-hidden="true" />
+                <span class="truncate">{directory}</span>
+              </>
+            ))}
+            <ChevronRight class="size-3 shrink-0" aria-hidden="true" />
+            <span class="truncate text-[var(--text-primary)]" aria-current="page">{pageTitle}</span>
+          </nav>
+
+          <article
+            class="docs-prose prose prose-sm max-w-none"
+            data-doc-article
+            data-pagefind-body
+            data-pagefind-filter={`product:${product.slug}`}
+            data-pagefind-meta={`product:${product.title}`}
+          >
+            {!hasContentH1 && (
+              <header class="mb-5 border-b border-[var(--border-hairline)] pb-4 not-prose">
+                <h1 class="text-[1.65rem] font-semibold leading-tight tracking-normal text-[var(--text-primary)]" data-pagefind-weight="10">{pageTitle}</h1>
+                {description && <p class="mt-2 text-sm leading-6 text-[var(--text-muted)]">{description}</p>}
+              </header>
+            )}
+
+            <slot />
+          </article>
+          <PrevNextNav product={product} page={page} />
+        </div>
+
+      <TableOfContents headings={headings} />
+      </main>
+    </div>
+  </div>
+</BaseLayout>

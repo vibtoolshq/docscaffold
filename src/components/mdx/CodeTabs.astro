@@ -1,0 +1,93 @@
+---
+import { randomUUID } from "node:crypto";
+
+interface Props {
+  labels: string[];
+  activeTab?: string;
+}
+
+const { labels, activeTab = labels[0] } = Astro.props;
+const groupId = `code-tabs-${randomUUID()}`;
+---
+
+<section class="my-4 overflow-hidden rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)]" data-code-tabs data-code-tabs-id={groupId}>
+  <div class="flex gap-1 overflow-x-auto border-b border-[var(--border-hairline)] px-2 pt-2" role="tablist" aria-label="Code examples">
+    {labels.map((label, index) => {
+      const isActive = label === activeTab || (!activeTab && index === 0);
+      return (
+        <button
+          class="shrink-0 rounded-t px-2.5 py-1.5 text-xs text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] data-[active=true]:border-b-2 data-[active=true]:border-[var(--accent-color)] data-[active=true]:text-[var(--text-primary)]"
+          type="button"
+          role="tab"
+          id={`${groupId}-tab-${index}`}
+          aria-controls={`${groupId}-panel-${index}`}
+          aria-selected={isActive ? "true" : "false"}
+          data-tab-trigger={label}
+          data-active={String(isActive)}
+        >
+          {label}
+        </button>
+      );
+    })}
+  </div>
+  <div
+    class="min-w-0 p-3 [&>[data-code-panel]]:hidden [&>[data-code-panel][data-active=true]]:block"
+    data-code-panels
+  >
+    <slot />
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-code-tabs]").forEach((group) => {
+    const groupId = group.dataset.codeTabsId ?? "code-tabs";
+    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>("[data-tab-trigger]"));
+    const panelContainer = group.querySelector<HTMLElement>("[data-code-panels]");
+    let panels = Array.from(group.querySelectorAll<HTMLElement>("[data-code-panel]"));
+
+    if (panels.length === 0 && panelContainer) {
+      panels = Array.from(panelContainer.children).filter(
+        (child): child is HTMLElement => child instanceof HTMLElement,
+      );
+      panels.forEach((panel, index) => {
+        const fallbackLabel = buttons[index]?.dataset.tabTrigger ?? String(index);
+        panel.dataset.codePanel = fallbackLabel;
+      });
+    }
+
+    panels.forEach((panel, index) => {
+      panel.id = `${groupId}-panel-${index}`;
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", `${groupId}-tab-${index}`);
+      panel.tabIndex = 0;
+    });
+
+    const activate = (label: string) => {
+      buttons.forEach((button) => {
+        const isActive = button.dataset.tabTrigger === label;
+        button.dataset.active = String(isActive);
+        button.setAttribute("aria-selected", String(isActive));
+        button.tabIndex = isActive ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        const isActive = panel.dataset.codePanel === label;
+        panel.dataset.active = String(isActive);
+        panel.hidden = !isActive;
+      });
+    };
+
+    buttons.forEach((button, index) => {
+      button.addEventListener("click", () => activate(button.dataset.tabTrigger ?? ""));
+      button.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const direction = event.key === "ArrowRight" ? 1 : -1;
+        const nextIndex = (index + direction + buttons.length) % buttons.length;
+        buttons[nextIndex]?.focus();
+        activate(buttons[nextIndex]?.dataset.tabTrigger ?? "");
+      });
+    });
+
+    activate(buttons.find((button) => button.getAttribute("aria-selected") === "true")?.dataset.tabTrigger ?? buttons[0]?.dataset.tabTrigger ?? "");
+  });
+</script>

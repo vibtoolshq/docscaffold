@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose a focused Vib Docs Engine improvement
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests should preserve the engine's static, configuration-driven architecture and avoid portal-specific product logic.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or workflow
+      description: Explain the current limitation and who is affected.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the user-visible result and configuration or setup changes needed.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List alternatives and why they do not fit the current architecture.
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Architecture checks
+      options:
+        - label: This can remain configuration-driven or fit an existing source boundary.
+          required: true
+        - label: This does not require credentials or private data in client-side code.
+          required: true

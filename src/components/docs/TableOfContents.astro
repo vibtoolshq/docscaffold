@@ -1,0 +1,80 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+<aside
+  class="sticky top-[52px] hidden h-[calc(100vh-3.25rem)] w-52 shrink-0 overflow-y-auto px-3 py-5 xl:block"
+  aria-label="Table of contents"
+  aria-hidden={tocHeadings.length === 0 ? "true" : undefined}
+>
+  {tocHeadings.length > 0 && (
+    <>
+      <p class="mb-3 font-mono text-[11px] uppercase tracking-wider text-[var(--text-muted)]">On This Page</p>
+      <nav aria-label="On this page">
+        <ul class="space-y-1">
+          {tocHeadings.map((heading) => (
+            <li>
+              <a
+                class:list={[
+                  "block rounded py-1 text-xs leading-5 text-[var(--text-muted)] no-underline transition-colors hover:text-[var(--text-primary)] data-[active=true]:font-medium data-[active=true]:text-[var(--accent-color)]",
+                  heading.depth === 3 && "pl-3",
+                ]}
+                href={`#${heading.slug}`}
+                data-toc-link
+                data-heading-id={heading.slug}
+              >
+                <span class="line-clamp-2">{heading.text}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </>
+  )}
+</aside>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[aria-label='Table of contents']").forEach((toc) => {
+    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"));
+    const headings = links
+      .map((link) => document.getElementById(link.dataset.headingId ?? ""))
+      .filter((heading): heading is HTMLElement => heading instanceof HTMLElement);
+
+    if (!headings.length || !("IntersectionObserver" in window)) return;
+
+    const linksByHeading = new Map(
+      links.map((link) => [link.dataset.headingId ?? "", link]),
+    );
+    const observer = new IntersectionObserver((entries) => {
+      const visibleHeadings = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top);
+      const activeHeading = visibleHeadings[0]?.target as HTMLElement | undefined;
+      if (!activeHeading) return;
+
+      links.forEach((link) => {
+        const isActive = link.dataset.headingId === activeHeading.id;
+        link.dataset.active = String(isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    }, {
+      rootMargin: "-12% 0px -72% 0px",
+      threshold: 0,
+    });
+
+    headings.forEach((heading) => observer.observe(heading));
+    toc.addEventListener("astro:before-swap", () => observer.disconnect(), { once: true });
+  });
+</script>

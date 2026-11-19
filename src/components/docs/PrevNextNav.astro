@@ -1,0 +1,79 @@
+---
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-astro";
+import type { FlatPage, ManifestProject } from "../../utils/manifest";
+
+interface Props {
+  product: ManifestProject;
+  page: FlatPage;
+}
+
+const { product, page } = Astro.props;
+const pageIndex = product.flatPages.findIndex((candidate) => candidate.route === page.route);
+const previous = pageIndex > 0 ? product.flatPages[pageIndex - 1] : undefined;
+const next = pageIndex >= 0 ? product.flatPages[pageIndex + 1] : undefined;
+
+function getEditUrl(repoUrl: string | undefined, branch: string, docsPath: string, source: string): string | undefined {
+  if (!repoUrl) return undefined;
+  let host: string;
+  let repositoryPath: string;
+
+  try {
+    const repository = new URL(repoUrl);
+    host = repository.hostname;
+    repositoryPath = repository.pathname;
+  } catch {
+    const scpUrl = /^(?:[^@]+@)?([^:]+):(.+)$/.exec(repoUrl);
+    if (!scpUrl) return undefined;
+    host = scpUrl[1];
+    repositoryPath = `/${scpUrl[2]}`;
+  }
+
+  const cleanRepositoryPath = repositoryPath.replace(/\.git$/i, "").replace(/\/$/, "");
+  const providerPath = host === "github.com" || host.endsWith(".github.com")
+    ? "edit"
+    : host.includes("gitlab")
+      ? "-/edit"
+      : "_edit";
+  const encodePath = (value: string) => value.split("/").filter(Boolean).map(encodeURIComponent).join("/");
+  const encodedBranch = encodeURIComponent(branch || "main");
+  const encodedSource = encodePath(`${docsPath || "docs"}/${source}`);
+
+  return `https://${host}${cleanRepositoryPath}/${providerPath}/${encodedBranch}/${encodedSource}`;
+}
+
+const editUrl = getEditUrl(
+  product.repoUrl,
+  product.branch || "main",
+  product.docsPath || "docs",
+  page.source,
+);
+---
+
+<section class="mt-8 border-t border-[var(--border-hairline)] pt-4" aria-label="Page actions and navigation">
+  {editUrl && (
+    <a
+      class="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] no-underline transition-colors hover:text-[var(--accent-color)]"
+      href={editUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Edit this page on Git
+      <ExternalLink class="size-3" aria-hidden="true" />
+    </a>
+  )}
+
+  <nav class="mt-4 grid grid-cols-2 gap-3" aria-label="Previous and next pages">
+    {previous ? (
+      <a class="group rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] p-3 text-left no-underline transition-colors hover:bg-[var(--bg-hover)]" href={previous.route} rel="prev">
+        <span class="flex items-center gap-1 text-[11px] text-[var(--text-muted)]"><ChevronLeft class="size-3" aria-hidden="true" /> Previous</span>
+        <span class="mt-1 block truncate text-xs font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)]">{previous.title}</span>
+      </a>
+    ) : <span aria-hidden="true"></span>}
+    {next ? (
+      <a class="group rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] p-3 text-right no-underline transition-colors hover:bg-[var(--bg-hover)]" href={next.route} rel="next">
+        <span class="flex items-center justify-end gap-1 text-[11px] text-[var(--text-muted)]">Next <ChevronRight class="size-3" aria-hidden="true" /></span>
+        <span class="mt-1 block truncate text-xs font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)]">{next.title}</span>
+      </a>
+    ) : <span aria-hidden="true"></span>}
+  </nav>
+</section>

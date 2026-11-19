@@ -1,0 +1,149 @@
+---
+import { ArrowUpRight, Check, ChevronDown, Menu, Search, X } from "lucide-astro";
+import { formatVersionBadge, getMonogram, resolveAccentColor } from "../../utils/theme";
+import type { ManifestProject } from "../../utils/manifest";
+import ThemeToggle from "../ui/ThemeToggle.astro";
+
+interface Props {
+  product: ManifestProject;
+  projects: ManifestProject[];
+}
+
+const { product, projects } = Astro.props;
+const productAccent = resolveAccentColor(product.accentColor);
+const versionBadge = formatVersionBadge(product.version);
+const isExternalCta = product.ctaUrl ? /^https?:\/\//i.test(product.ctaUrl) : false;
+---
+
+<header class="sticky top-0 z-40 h-14 border-b border-[var(--border-hairline)] bg-[var(--bg-canvas)]/90 backdrop-blur-md">
+  <div class="mx-auto flex h-full max-w-[1600px] items-center justify-between gap-2 px-3 sm:px-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4 lg:px-6">
+    <div class="flex min-w-0 items-center gap-1.5 sm:gap-2.5 lg:justify-self-start">
+      <button
+        class="inline-grid size-8 shrink-0 cursor-pointer place-items-center rounded-md border border-transparent text-[var(--text-muted)] transition-colors hover:border-[var(--border-hairline)] hover:bg-[var(--bg-surface)] md:hidden"
+        type="button"
+        id="mobile-sidebar-toggle"
+        aria-label="Open documentation navigation"
+        aria-controls="mobile-sidebar-drawer"
+        aria-expanded="false"
+      >
+        <Menu class="size-4" data-menu-icon aria-hidden="true" />
+        <X class="hidden size-4" data-close-icon aria-hidden="true" />
+      </button>
+
+      <a class="shrink-0 text-xs text-[var(--text-muted)] no-underline transition-colors hover:text-[var(--text-primary)]" href="/">
+        ← All
+      </a>
+      <span class="h-4 w-px shrink-0 bg-[var(--border-hairline)]" aria-hidden="true"></span>
+
+      <details class="group/product relative min-w-0" data-product-switcher>
+        <summary
+          class="flex max-w-[178px] cursor-pointer list-none items-center gap-1 rounded-md py-1 text-[var(--text-primary)] marker:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)] sm:max-w-[260px]"
+          aria-label={`Switch product. Current product: ${product.title}`}
+          style={`--product-accent: ${productAccent};`}
+        >
+          {product.logoUrl ? (
+            <img class="size-6 shrink-0 rounded border border-[var(--border-hairline)] object-contain p-0.5 sm:size-7" src={product.logoUrl} alt="" width="28" height="28" />
+          ) : (
+            <span class="grid size-6 shrink-0 place-items-center rounded border border-[color-mix(in_srgb,var(--product-accent)_40%,var(--border-hairline))] bg-[color-mix(in_srgb,var(--product-accent)_12%,var(--bg-surface))] text-[10px] font-semibold text-[var(--product-accent)] sm:size-7">
+              {getMonogram(product.title)}
+            </span>
+          )}
+          <span class="max-w-[54px] truncate text-xs font-semibold sm:max-w-36 sm:text-sm">{product.title}</span>
+          {versionBadge && (
+            <span class="hidden shrink-0 rounded border border-[var(--border-hairline)] px-1 py-0.5 font-mono text-[10px] leading-4 text-[var(--text-muted)] sm:inline-flex">
+              {versionBadge}
+            </span>
+          )}
+          <ChevronDown class="size-3.5 shrink-0 text-[var(--text-muted)] transition-transform group-open/product:rotate-180" aria-hidden="true" />
+        </summary>
+
+        <div class="absolute left-0 top-[calc(100%+8px)] z-50 w-[min(18rem,calc(100vw-1rem))] overflow-hidden rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-surface)] p-1.5 shadow-xl shadow-black/15">
+          <p class="px-2 py-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Products</p>
+          <nav aria-label="Switch product" class="max-h-[min(70vh,28rem)] overflow-y-auto">
+            {projects.map((candidate) => (
+              <a
+                class:list={[
+                  "flex items-center gap-2 rounded-md px-2 py-2 text-[var(--text-primary)] no-underline transition-colors hover:bg-[var(--bg-hover)]",
+                  candidate.slug === product.slug && "bg-[var(--bg-hover)]",
+                ]}
+                href={`/${candidate.slug}/`}
+                aria-current={candidate.slug === product.slug ? "page" : undefined}
+              >
+                {candidate.logoUrl ? (
+                  <img class="size-7 shrink-0 rounded border border-[var(--border-hairline)] object-contain p-0.5" src={candidate.logoUrl} alt="" width="28" height="28" />
+                ) : (
+                  <span class="grid size-7 shrink-0 place-items-center rounded border border-[var(--border-hairline)] bg-[var(--bg-canvas)] text-[10px] font-semibold text-[var(--accent-color)]">
+                    {getMonogram(candidate.title)}
+                  </span>
+                )}
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-xs font-medium">{candidate.title}</span>
+                  <span class="block truncate text-[11px] text-[var(--text-muted)]">{candidate.category}</span>
+                </span>
+                {candidate.slug === product.slug && <Check class="size-3.5 shrink-0 text-[var(--accent-color)]" aria-hidden="true" />}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </details>
+    </div>
+
+    <button
+      class="ml-auto inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-xs text-[var(--text-muted)] transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)] sm:w-auto sm:justify-between sm:px-2.5 md:min-w-[200px] lg:ml-0 lg:w-72 lg:justify-self-center xl:w-80"
+      type="button"
+      data-doc-search-trigger
+      data-product-slug={product.slug}
+      data-product-title={product.title}
+      aria-label={`Search ${product.title} documentation`}
+    >
+      <span class="flex min-w-0 items-center gap-2">
+        <Search class="size-3.5 shrink-0" aria-hidden="true" />
+        <span class="hidden truncate sm:inline">Search {product.title}...</span>
+      </span>
+      <kbd class="hidden shrink-0 rounded border border-[var(--border-hairline)] bg-[var(--bg-canvas)] px-1.5 py-px font-mono text-[10px] leading-4 text-[var(--text-muted)] lg:inline-flex">Ctrl K</kbd>
+    </button>
+
+    <div class="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:justify-self-end">
+      {product.ctaUrl && (
+        <a
+          class="inline-flex h-8 max-w-[84px] items-center gap-1 rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-2.5 text-xs font-medium text-[var(--text-primary)] no-underline transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-hover)] sm:max-w-none"
+          href={product.ctaUrl}
+          target={isExternalCta ? "_blank" : undefined}
+          rel={isExternalCta ? "noopener noreferrer" : undefined}
+        >
+          <span class="truncate">{product.ctaLabel || "Open"}</span>
+          {isExternalCta && <ArrowUpRight class="hidden size-3 shrink-0 text-[var(--text-muted)] sm:inline" aria-hidden="true" />}
+        </a>
+      )}
+
+      {product.ctaUrl && <span class="hidden h-4 w-px bg-[var(--border-hairline)] sm:block" aria-hidden="true"></span>}
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<script>
+  const searchButtons = document.querySelectorAll<HTMLButtonElement>("[data-doc-search-trigger]");
+  searchButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("vib:open-search", {
+        detail: {
+          productSlug: button.dataset.productSlug,
+          productTitle: button.dataset.productTitle,
+        },
+      }));
+    });
+  });
+
+  document.querySelectorAll<HTMLDetailsElement>("[data-product-switcher]").forEach((switcher) => {
+    document.addEventListener("click", (event) => {
+      if (!switcher.contains(event.target as Node)) switcher.open = false;
+    });
+    switcher.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        switcher.open = false;
+        switcher.querySelector("summary")?.focus();
+      }
+    });
+  });
+</script>

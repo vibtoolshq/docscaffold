@@ -1,0 +1,64 @@
+---
+import { ChevronRight } from "lucide-astro";
+import type { SidebarNode } from "../../utils/manifest";
+
+interface Props {
+  items: SidebarNode[];
+  currentPath: string;
+}
+
+const { items, currentPath } = Astro.props;
+
+function normalizePath(value: string): string {
+  const clean = (value || "/").split(/[?#]/, 1)[0].replace(/\/+$/, "");
+  return clean ? `${clean}/` : "/";
+}
+
+const normalizedCurrentPath = normalizePath(currentPath);
+---
+
+<ul class="space-y-0.5">
+  {items.map((item) => {
+    if (item.type === "group") {
+      const normalizedGroupRoute = normalizePath(item.route);
+      const isGroupActive = normalizedCurrentPath.startsWith(normalizedGroupRoute);
+      return (
+        <li class="pt-2 first:pt-0">
+          <details open class="group/nav">
+            <summary
+              class:list={[
+                "flex cursor-pointer list-none items-center gap-1.5 rounded px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide marker:hidden hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--accent-color)]",
+                isGroupActive ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]",
+              ]}
+            >
+              <ChevronRight class="size-3 shrink-0 transition-transform group-open/nav:rotate-90" aria-hidden="true" />
+              <span class="truncate">{item.title}</span>
+            </summary>
+            <div class="ml-2 border-l border-[var(--border-hairline)] pl-1.5 pt-0.5">
+              <Astro.self items={item.children} currentPath={currentPath} />
+            </div>
+          </details>
+        </li>
+      );
+    }
+
+    const isCurrent = normalizePath(item.route) === normalizedCurrentPath;
+    return (
+      <li>
+        <a
+          class:list={[
+            "block rounded-md border-l-2 px-2.5 py-1.5 text-[13px] leading-5 no-underline transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]",
+            isCurrent
+              ? "border-l-[var(--accent-color)] bg-[color-mix(in_srgb,var(--accent-color)_12%,var(--bg-surface))] text-[var(--accent-color)]"
+              : "border-l-transparent text-[var(--text-muted)]",
+          ]}
+          href={item.route}
+          data-sidebar-link
+          aria-current={isCurrent ? "page" : undefined}
+        >
+          <span class="block truncate">{item.title}</span>
+        </a>
+      </li>
+    );
+  })}
+</ul>

@@ -1,0 +1,19 @@
+{
+  "portalTitle": "DocScaffold Documentation",
+  "portalSubtitle": "Open-source documentation engine guides.",
+  "domain": "https://docs.example.com",
+  "brandName": "DocScaffold",
+  "brandLogo": "/vib-tools-logo.png",
+  "defaultAccent": "#7C3AED",
+  "portalType": "all",
+  "navLinks": [
+    {
+      "label": "Source",
+      "href": "https://github.com/vibtoolshq/docscaffold"
+    },
+    {
+      "label": "Vib Tools",
+      "href": "https://vib.tools"
+    }
+  ]
+}

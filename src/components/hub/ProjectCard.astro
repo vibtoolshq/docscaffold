@@ -1,0 +1,85 @@
+---
+import { formatVersionBadge, getMonogram, resolveAccentColor } from "../../utils/theme";
+
+interface Project {
+  slug: string;
+  category: string;
+  accentColor?: string;
+  title: string;
+  description?: string;
+  version?: string | number;
+  logoUrl?: string | null;
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const title = project.title || project.slug;
+const description = project.description?.trim() || "Documentation and product guides.";
+const versionBadge = formatVersionBadge(project.version);
+const accent = resolveAccentColor(project.accentColor);
+const monogram = getMonogram(title);
+---
+
+<a
+  class="project-card group flex min-h-[164px] flex-col rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-surface)] p-3.5 text-inherit no-underline transition-colors hover:bg-[var(--bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--card-accent)]"
+  href={`/${project.slug}/`}
+  style={`--card-accent: ${accent};`}
+  data-project-card
+  data-category={project.category}
+  aria-label={`Read ${title} documentation`}
+>
+  <div class="flex min-w-0 items-center gap-2.5">
+    {project.logoUrl ? (
+      <img
+        class="size-8 shrink-0 rounded-md border border-[var(--border-hairline)] bg-[var(--bg-canvas)] object-contain p-1"
+        src={project.logoUrl}
+        alt=""
+        width="32"
+        height="32"
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <span
+        class="grid size-8 shrink-0 place-items-center rounded-md border font-semibold text-xs"
+        style={`color: var(--card-accent); border-color: color-mix(in srgb, var(--card-accent) 32%, var(--border-hairline)); background: color-mix(in srgb, var(--card-accent) 12%, var(--bg-surface));`}
+        aria-hidden="true"
+      >
+        {monogram}
+      </span>
+    )}
+    <span class="min-w-0 flex-1 truncate text-sm font-semibold text-[var(--text-primary)]">
+      {title}
+    </span>
+    {versionBadge && (
+      <span class="shrink-0 rounded border border-[var(--border-hairline)] px-1.5 py-0.5 font-mono text-[11px] leading-4 text-[var(--text-muted)]">
+        {versionBadge}
+      </span>
+    )}
+  </div>
+
+  <p class="mt-3 min-h-10 line-clamp-2 text-[13px] leading-5 text-[var(--text-muted)]">
+    {description}
+  </p>
+
+  <div class="mt-auto flex items-center justify-between gap-3 pt-3 text-xs">
+    <span class="truncate text-[var(--text-muted)]">{project.category}</span>
+    <span class="inline-flex shrink-0 items-center gap-1 font-medium text-[var(--text-primary)]">
+      Read Docs
+      <span class="project-card-arrow text-[var(--card-accent)] transition-transform" aria-hidden="true">→</span>
+    </span>
+  </div>
+</a>
+
+<style>
+  .project-card:hover {
+    border-color: color-mix(in srgb, var(--card-accent) 42%, var(--border-hairline));
+  }
+
+  .project-card:hover .project-card-arrow {
+    transform: translateX(3px);
+  }
+</style>

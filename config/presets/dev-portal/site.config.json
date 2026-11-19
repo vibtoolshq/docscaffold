@@ -1,0 +1,15 @@
+{
+  "portalTitle": "DocScaffold Developer Docs",
+  "portalSubtitle": "Documentation for developers.",
+  "domain": "https://developer.example.com",
+  "brandName": "DocScaffold",
+  "brandLogo": "/vib-tools-logo.png",
+  "defaultAccent": "#7C3AED",
+  "portalType": "developer",
+  "navLinks": [
+    {
+      "label": "Source",
+      "href": "https://github.com/vibtoolshq/docscaffold"
+    }
+  ]
+}

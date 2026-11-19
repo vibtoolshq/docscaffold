@@ -1,0 +1,16 @@
+{
+  "$schema": "https://docs.vib.tools/schemas/vibtools-docs.schema.json",
+  "schemaVersion": 1,
+  "docsType": "developer",
+  "slug": "vib-docs-engine",
+  "title": "DocScaffold",
+  "category": "Documentation Engines",
+  "description": "Open-source static multi-repository documentation engine.",
+  "version": "0.1.0",
+  "accentColor": "#7C3AED",
+  "docsPath": "docs",
+  "logoPath": ".vibtools/logo.png",
+  "branch": "main",
+  "ctaLabel": "View source",
+  "ctaUrl": "https://github.com/vibtoolshq/docscaffold"
+}

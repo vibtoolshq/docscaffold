@@ -1,0 +1,88 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import { relative, resolve, sep } from "node:path";
+import Callout from "../../components/mdx/Callout.astro";
+import CodeTabs from "../../components/mdx/CodeTabs.astro";
+import manifest from "../../generated/manifest.json";
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import type { FlatPage, ManifestProject } from "../../utils/manifest";
+
+interface RouteProps {
+  product: ManifestProject;
+  projects: ManifestProject[];
+  page: FlatPage;
+  entryId: string;
+}
+
+export async function getStaticPaths() {
+  const entries = await getCollection("docs");
+  const paths = [];
+
+  for (const product of manifest.projects) {
+    const projectPrefix = `${product.slug}/`;
+    const productEntries = entries.filter(
+      (entry) =>
+        entry.data.draft !== true &&
+        (entry.id.replace(/\\/g, "/") === product.slug ||
+          entry.id.replace(/\\/g, "/").startsWith(projectPrefix)),
+    );
+
+    if (product.flatPages.length > 0 && productEntries.length === 0) {
+      throw new Error(`No docs collection entries found for project "${product.slug}"`);
+    }
+
+    for (const entry of productEntries) {
+      const normalizedId = entry.id.replace(/\\/g, "/");
+      const contentRoot = resolve(process.cwd(), "src", "content", "docs", product.slug);
+      const relativeSource = entry.filePath
+        ? relative(contentRoot, resolve(entry.filePath)).split(sep).join("/")
+        : normalizedId === product.slug
+          ? "index.md"
+          : normalizedId.slice(projectPrefix.length);
+      const page = product.flatPages.find(
+        (candidate) => candidate.source.replace(/\\/g, "/") === relativeSource,
+      );
+
+      if (!page) {
+        throw new Error(`Docs entry "${entry.id}" has no matching manifest flatPage for "${product.slug}"`);
+      }
+
+      const routeSegments = page.route.split("/").filter(Boolean).slice(1);
+      paths.push({
+        params: {
+          product: product.slug,
+          slug: routeSegments.length > 0 ? routeSegments.join("/") : undefined,
+        },
+        props: {
+          product: product as unknown as ManifestProject,
+          projects: manifest.projects as unknown as ManifestProject[],
+          page,
+          entryId: entry.id,
+        },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { product, projects, page, entryId } = Astro.props as RouteProps;
+const entry = await getEntry("docs", entryId);
+if (!entry) throw new Error(`Docs entry "${entryId}" disappeared during route generation`);
+const { Content, headings } = await render(entry);
+const contentH1 = headings.find((heading) => heading.depth === 1);
+const pageTitle = entry.data.title || contentH1?.text || page.title;
+---
+
+<DocsLayout
+  product={product}
+  projects={projects}
+  page={page}
+  pageTitle={pageTitle}
+  hasContentH1={Boolean(contentH1)}
+  headings={headings}
+  description={entry.data.description}
+  canonicalPath={page.route}
+>
+  <Content components={{ Callout, CodeTabs }} />
+</DocsLayout>

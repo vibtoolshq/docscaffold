@@ -1,0 +1,84 @@
+---
+import type { ManifestProject } from "../../utils/manifest";
+import SidebarTree from "./SidebarTree.astro";
+
+interface Props {
+  product: ManifestProject;
+  currentPath: string;
+}
+
+const { product, currentPath } = Astro.props;
+---
+
+<aside class="sticky top-[52px] hidden h-[calc(100vh-3.25rem)] w-60 shrink-0 overflow-y-auto border-r border-[var(--border-hairline)] px-3 py-4 md:block" aria-label={`${product.title} documentation navigation`}>
+  <SidebarTree items={product.sidebar} currentPath={currentPath} />
+</aside>
+
+<button
+  class="fixed inset-x-0 bottom-0 top-[52px] z-40 hidden cursor-default bg-black/45 backdrop-blur-[1px] md:hidden"
+  type="button"
+  id="mobile-sidebar-backdrop"
+  aria-label="Close documentation navigation"
+></button>
+
+<aside
+  class="fixed bottom-0 left-0 top-[52px] z-50 w-[min(18rem,86vw)] -translate-x-full overflow-y-auto border-r border-[var(--border-hairline)] bg-[var(--bg-canvas)] px-3 py-4 shadow-xl shadow-black/20 transition-transform duration-200 md:hidden"
+  id="mobile-sidebar-drawer"
+  aria-label={`${product.title} documentation navigation`}
+  aria-hidden="true"
+  inert
+>
+  <SidebarTree items={product.sidebar} currentPath={currentPath} />
+</aside>
+
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>("#mobile-sidebar-toggle");
+  const drawer = document.querySelector<HTMLElement>("#mobile-sidebar-drawer");
+  const backdrop = document.querySelector<HTMLButtonElement>("#mobile-sidebar-backdrop");
+  const menuIcon = menuButton?.querySelector<SVGElement>("[data-menu-icon]");
+  const closeIcon = menuButton?.querySelector<SVGElement>("[data-close-icon]");
+
+  if (menuButton && drawer && backdrop) {
+    const closeDrawer = (restoreFocus = false) => {
+      drawer.classList.add("-translate-x-full");
+      drawer.classList.remove("translate-x-0");
+      drawer.inert = true;
+      drawer.setAttribute("aria-hidden", "true");
+      backdrop.classList.add("hidden");
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open documentation navigation");
+      menuIcon?.classList.remove("hidden");
+      closeIcon?.classList.add("hidden");
+      document.body.style.overflow = "";
+      if (restoreFocus) menuButton.focus();
+    };
+
+    const openDrawer = () => {
+      drawer.classList.remove("-translate-x-full");
+      drawer.classList.add("translate-x-0");
+      drawer.inert = false;
+      drawer.setAttribute("aria-hidden", "false");
+      backdrop.classList.remove("hidden");
+      menuButton.setAttribute("aria-expanded", "true");
+      menuButton.setAttribute("aria-label", "Close documentation navigation");
+      menuIcon?.classList.add("hidden");
+      closeIcon?.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+      drawer.querySelector<HTMLAnchorElement>("a[data-sidebar-link]")?.focus();
+    };
+
+    menuButton.addEventListener("click", () => {
+      if (menuButton.getAttribute("aria-expanded") === "true") closeDrawer();
+      else openDrawer();
+    });
+    backdrop.addEventListener("click", () => closeDrawer());
+    drawer.addEventListener("click", (event) => {
+      if ((event.target as Element).closest("a[data-sidebar-link]")) closeDrawer();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && menuButton.getAttribute("aria-expanded") === "true") {
+        closeDrawer(true);
+      }
+    });
+  }
+</script>

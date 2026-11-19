@@ -1,0 +1,670 @@
+---
+import { Search, X } from "lucide-astro";
+import manifest from "../../generated/manifest.json";
+import type { ManifestProject } from "../../utils/manifest";
+import { buildQuickSuggestions } from "../../utils/search";
+
+const quickSuggestions = buildQuickSuggestions(manifest.projects as ManifestProject[], 5);
+---
+
+<div
+  class="search-backdrop fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/25 px-3 pt-10 backdrop-blur-[2px] sm:px-6 sm:pt-14 dark:bg-black/60"
+  data-search-modal
+  hidden
+  aria-hidden="true"
+  data-state="closed"
+>
+  <div
+    class="search-palette mx-auto w-full max-w-[600px] overflow-hidden rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-canvas)] shadow-xl shadow-black/10 dark:bg-[var(--bg-surface)] dark:shadow-black/45"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="search-title"
+    aria-describedby="search-status"
+  >
+    <h2 class="sr-only" id="search-title">Search documentation</h2>
+
+    <div class="flex h-12 items-center gap-2.5 border-b border-[var(--border-hairline)] px-3.5">
+      <Search class="size-4 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
+      <input
+        class="min-w-0 flex-1 appearance-none bg-transparent text-[13.5px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+        type="search"
+        placeholder="Search documentation..."
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search documentation"
+        aria-controls="search-results"
+        data-search-input
+      />
+      <button
+        class="inline-grid size-6 shrink-0 cursor-pointer place-items-center rounded text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--accent-color)]"
+        type="button"
+        aria-label="Clear search"
+        data-search-clear
+        hidden
+      >
+        <X class="size-3.5" aria-hidden="true" />
+      </button>
+      <button
+        class="shrink-0 cursor-pointer rounded border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-1.5 py-0.5 font-mono text-[10px] leading-4 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--accent-color)] dark:bg-[var(--bg-canvas)]"
+        type="button"
+        aria-label="Close search"
+        data-search-close
+      >
+        ESC
+      </button>
+    </div>
+
+    <div
+      class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-hairline)] bg-[var(--bg-surface)] px-3.5 py-1.5 dark:bg-[var(--bg-canvas)]/50"
+      data-search-scope-bar
+      hidden
+    >
+      <div class="flex items-center gap-1.5">
+        <span class="mr-0.5 text-[11px] text-[var(--text-muted)]">Search in</span>
+        <button class="search-scope-button" type="button" data-search-scope="product" aria-pressed="true">Current Product Only</button>
+        <button class="search-scope-button" type="button" data-search-scope="all" aria-pressed="false">All Docs</button>
+      </div>
+      <span class="text-[11px] text-[var(--text-muted)]" data-search-count hidden></span>
+    </div>
+
+    <ul
+      class="max-h-[min(58vh,28rem)] overflow-y-auto p-2"
+      id="search-results"
+      data-search-results
+      aria-label="Search results"
+    ></ul>
+
+    <div
+      class="px-4 py-6 text-center text-xs text-[var(--text-muted)]"
+      data-search-empty
+      hidden
+    >
+      No matching documentation found.
+    </div>
+
+    <div class="flex items-center justify-between gap-3 border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] px-3.5 py-2 text-[11px] text-[var(--text-muted)] dark:bg-[var(--bg-canvas)]/50">
+      <p class="m-0 truncate" id="search-status" role="status" aria-live="polite" data-search-status>
+        Type to search documentation.
+      </p>
+      <div class="hidden shrink-0 items-center gap-2.5 sm:flex" aria-hidden="true">
+        <span class="inline-flex items-center gap-1"><kbd class="rounded border border-[var(--border-hairline)] px-1 font-mono text-[10px] leading-4">↑↓</kbd> Navigate</span>
+        <span class="inline-flex items-center gap-1"><kbd class="rounded border border-[var(--border-hairline)] px-1 font-mono text-[10px] leading-4">↵</kbd> Open</span>
+        <span class="inline-flex items-center gap-1"><kbd class="rounded border border-[var(--border-hairline)] px-1 font-mono text-[10px] leading-4">ESC</kbd> Close</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" data-search-suggestions is:inline set:html={JSON.stringify(quickSuggestions)}></script>
+
+<style>
+  [data-search-modal][hidden],
+  [data-search-scope-bar][hidden],
+  [data-search-clear][hidden],
+  [data-search-empty][hidden],
+  [data-search-results][hidden],
+  [data-search-count][hidden] {
+    display: none;
+  }
+
+  .search-backdrop {
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .search-backdrop[data-state="open"] {
+    opacity: 1;
+  }
+
+  .search-palette {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+    transition: opacity 130ms ease, transform 130ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .search-backdrop[data-state="open"] .search-palette {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  :global(.search-palette mark) {
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--accent-color) 18%, transparent);
+    color: var(--text-primary);
+    padding: 0 2px;
+    font-weight: 500;
+  }
+
+  .search-scope-button {
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    padding: 2px 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.4;
+    transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+  }
+
+  .search-scope-button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .search-scope-button[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--accent-color) 45%, var(--border-hairline));
+    background: color-mix(in srgb, var(--accent-color) 12%, var(--bg-surface));
+    color: var(--text-primary);
+  }
+</style>
+
+<script>
+  import {
+    formatBreadcrumb,
+    normalizeRoutePath,
+    selectInitialSuggestions,
+    upsertRecentDoc,
+    type SearchLinkEntry,
+  } from "../../utils/search";
+
+  interface SearchDetail {
+    productSlug?: string;
+    productTitle?: string;
+  }
+
+  interface PagefindData {
+    url: string;
+    excerpt?: string;
+    meta?: Record<string, string | undefined>;
+    sub_results?: Array<{ title?: string; url: string; excerpt?: string }>;
+  }
+
+  interface PagefindResult {
+    data(): Promise<PagefindData>;
+  }
+
+  interface PagefindModule {
+    search(query: string, options?: { filters?: { product: string } }): Promise<{ results: PagefindResult[] }>;
+  }
+
+  const RECENT_STORAGE_KEY = "vib:recent-docs";
+  const modal = document.querySelector<HTMLElement>("[data-search-modal]");
+  const palette = modal?.querySelector<HTMLElement>(".search-palette");
+  const input = modal?.querySelector<HTMLInputElement>("[data-search-input]");
+  const clearButton = modal?.querySelector<HTMLButtonElement>("[data-search-clear]");
+  const closeButton = modal?.querySelector<HTMLButtonElement>("[data-search-close]");
+  const scopeBar = modal?.querySelector<HTMLElement>("[data-search-scope-bar]");
+  const countBadge = modal?.querySelector<HTMLElement>("[data-search-count]");
+  const status = modal?.querySelector<HTMLElement>("[data-search-status]");
+  const emptyBox = modal?.querySelector<HTMLElement>("[data-search-empty]");
+  const resultsList = modal?.querySelector<HTMLUListElement>("[data-search-results]");
+  const scopeButtons = Array.from(modal?.querySelectorAll<HTMLButtonElement>("[data-search-scope]") ?? []);
+  const suggestionsNode = document.querySelector<HTMLScriptElement>("script[data-search-suggestions]");
+
+  const allSuggestions: SearchLinkEntry[] = (() => {
+    try {
+      const parsed = JSON.parse(suggestionsNode?.textContent || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  let pagefindPromise: Promise<PagefindModule> | undefined;
+  let scopeSlug = "";
+  let scopeTitle = "";
+  let scope = "all";
+  let lastFocusedElement: HTMLElement | null = null;
+  let originalBodyOverflow = "";
+  let originalBodyPaddingRight = "";
+  let searchSequence = 0;
+  let debounceTimer: number | undefined;
+  const pagefindModulePath = "/pagefind/pagefind.js";
+
+  function readRecentDocs(): SearchLinkEntry[] {
+    try {
+      const raw = localStorage.getItem(RECENT_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function recordCurrentDocVisit(): void {
+    const context = document.querySelector<HTMLElement>("[data-search-context]");
+    const productSlug = context?.dataset.productSlug?.trim() || "";
+    const productTitle = context?.dataset.productTitle?.trim() || "";
+    if (!productSlug) return;
+
+    const route = normalizeRoutePath(window.location.pathname);
+    const articleHeading = document.querySelector<HTMLElement>("[data-doc-article] h1")?.textContent?.trim();
+    const fallbackTitle = document.title.split(" — ")[0]?.split(" | ")[0]?.trim() || productTitle || "Overview";
+    const entry: SearchLinkEntry = {
+      title: articleHeading || fallbackTitle,
+      route,
+      productSlug,
+      productTitle,
+      breadcrumb: formatBreadcrumb(route, productTitle),
+    };
+
+    try {
+      const updated = upsertRecentDoc(readRecentDocs(), entry, 3);
+      localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }
+
+  recordCurrentDocVisit();
+
+  function getPagefind(): Promise<PagefindModule> {
+    pagefindPromise ??= import(/* @vite-ignore */ pagefindModulePath) as Promise<PagefindModule>;
+    return pagefindPromise;
+  }
+
+  function setStatus(message: string, countText = ""): void {
+    if (status) status.textContent = message;
+    if (countBadge) {
+      countBadge.textContent = countText;
+      countBadge.hidden = !countText;
+    }
+  }
+
+  function createSvgIcon(kind: "doc" | "clock"): SVGSVGElement {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.75");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    svg.classList.add("size-4", "shrink-0", "text-[var(--text-muted)]");
+
+    if (kind === "clock") {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", "12");
+      circle.setAttribute("cy", "12");
+      circle.setAttribute("r", "9");
+      const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      polyline.setAttribute("points", "12 7 12 12 15 14");
+      svg.append(circle, polyline);
+    } else {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z");
+      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      poly.setAttribute("points", "14 2 14 8 20 8");
+      const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line1.setAttribute("x1", "16");
+      line1.setAttribute("y1", "13");
+      line1.setAttribute("x2", "8");
+      line1.setAttribute("y2", "13");
+      const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line2.setAttribute("x1", "16");
+      line2.setAttribute("y1", "17");
+      line2.setAttribute("x2", "8");
+      line2.setAttribute("y2", "17");
+      svg.append(path, poly, line1, line2);
+    }
+    return svg;
+  }
+
+  function safeResultUrl(value: string): string | null {
+    try {
+      const url = new URL(value, window.location.origin);
+      return url.origin === window.location.origin ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function appendSafeExcerpt(parent: HTMLElement, excerpt: string): void {
+    const parsed = new DOMParser().parseFromString(`<body>${excerpt}</body>`, "text/html");
+    const appendNode = (node: Node, container: HTMLElement): void => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        container.append(document.createTextNode(node.textContent ?? ""));
+        return;
+      }
+      if (node instanceof HTMLElement && node.tagName === "MARK") {
+        const mark = document.createElement("mark");
+        for (const child of Array.from(node.childNodes)) appendNode(child, mark);
+        container.append(mark);
+        return;
+      }
+      for (const child of Array.from(node.childNodes)) appendNode(child, container);
+    };
+    appendNode(parsed.body, parent);
+  }
+
+  function createSuggestionSection(titleText: string, entries: SearchLinkEntry[], iconKind: "doc" | "clock"): DocumentFragment {
+    const fragment = document.createDocumentFragment();
+    if (!entries.length) return fragment;
+
+    const headerItem = document.createElement("li");
+    headerItem.className = "px-2.5 pb-1 pt-2 first:pt-1 text-[11px] font-medium text-[var(--text-muted)]";
+    headerItem.setAttribute("role", "presentation");
+    headerItem.textContent = titleText;
+    fragment.append(headerItem);
+
+    for (const entry of entries) {
+      const href = safeResultUrl(entry.route);
+      if (!href) continue;
+
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.className = "group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-inherit no-underline outline-none transition-colors hover:bg-[var(--bg-hover)] focus:bg-[var(--bg-hover)] focus-visible:bg-[var(--bg-hover)]";
+      link.href = href;
+
+      const iconBox = document.createElement("span");
+      iconBox.className = "grid size-7 shrink-0 place-items-center rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] dark:bg-[var(--bg-canvas)]";
+      iconBox.append(createSvgIcon(iconKind));
+
+      const body = document.createElement("span");
+      body.className = "min-w-0 flex-1";
+      const title = document.createElement("span");
+      title.className = "block truncate text-[13px] font-medium text-[var(--text-primary)]";
+      title.textContent = entry.title;
+      const crumb = document.createElement("span");
+      crumb.className = "block truncate text-[11px] text-[var(--text-muted)]";
+      crumb.textContent = entry.breadcrumb;
+      body.append(title, crumb);
+
+      const arrow = document.createElement("span");
+      arrow.className = "shrink-0 text-xs text-[var(--text-muted)] opacity-0 transition-opacity group-hover:opacity-100 group-focus:opacity-100";
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.textContent = "→";
+
+      link.append(iconBox, body, arrow);
+      item.append(link);
+      fragment.append(item);
+    }
+    return fragment;
+  }
+
+  function renderInitialState(): void {
+    if (!resultsList || !emptyBox) return;
+    const { recent, suggested } = selectInitialSuggestions({
+      suggestions: allSuggestions,
+      recentDocs: readRecentDocs(),
+      scope,
+      scopeSlug,
+      limit: 4,
+    });
+
+    const fragment = document.createDocumentFragment();
+    fragment.append(createSuggestionSection("Recently viewed", recent, "clock"));
+    fragment.append(createSuggestionSection("Suggested", suggested, "doc"));
+
+    resultsList.replaceChildren(fragment);
+    const hasLinks = recent.length > 0 || suggested.length > 0;
+    resultsList.hidden = !hasLinks;
+    emptyBox.hidden = true;
+    setStatus(hasLinks ? "Quick navigation · Type to filter docs" : "Type to search documentation.");
+  }
+
+  function createResultItem(data: PagefindData): HTMLLIElement | null {
+    const href = safeResultUrl(data.url);
+    if (!href) return null;
+    const item = document.createElement("li");
+    item.className = "mb-0.5 last:mb-0";
+
+    const link = document.createElement("a");
+    link.className = "group block rounded-md px-2.5 py-2 text-inherit no-underline outline-none transition-colors hover:bg-[var(--bg-hover)] focus:bg-[var(--bg-hover)] focus-visible:bg-[var(--bg-hover)]";
+    link.href = href;
+
+    const topRow = document.createElement("span");
+    topRow.className = "flex items-center gap-2";
+    topRow.append(createSvgIcon("doc"));
+
+    const title = document.createElement("span");
+    title.className = "min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--text-primary)]";
+    title.textContent = data.meta?.title || decodeURIComponent(new URL(href).pathname.split("/").filter(Boolean).at(-1) || "Documentation");
+    topRow.append(title);
+
+    if (scope === "all" && data.meta?.product) {
+      const productBadge = document.createElement("span");
+      productBadge.className = "shrink-0 rounded border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-1.5 py-0.5 text-[10px] font-normal text-[var(--text-muted)] dark:bg-[var(--bg-canvas)]";
+      productBadge.textContent = data.meta.product;
+      topRow.append(productBadge);
+    }
+    link.append(topRow);
+
+    if (data.excerpt) {
+      const excerpt = document.createElement("span");
+      excerpt.className = "mt-1 block pl-6 line-clamp-2 text-xs leading-5 text-[var(--text-muted)]";
+      appendSafeExcerpt(excerpt, data.excerpt);
+      link.append(excerpt);
+    }
+
+    item.append(link);
+
+    const subResults = (data.sub_results ?? []).filter((sub) => Boolean(sub.title && safeResultUrl(sub.url))).slice(0, 4);
+    if (subResults.length > 0) {
+      const subContainer = document.createElement("div");
+      subContainer.className = "mb-1 ml-6 mt-0.5 space-y-0.5 border-l border-[var(--border-hairline)] pl-2.5";
+      for (const subResult of subResults) {
+        const subHref = safeResultUrl(subResult.url);
+        if (!subHref || !subResult.title) continue;
+        const subLink = document.createElement("a");
+        subLink.className = "flex items-center gap-1.5 rounded px-2 py-1 text-xs text-[var(--text-muted)] no-underline outline-none transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] focus:bg-[var(--bg-hover)] focus:text-[var(--text-primary)]";
+        subLink.href = subHref;
+        const hash = document.createElement("span");
+        hash.className = "text-[11px] opacity-60";
+        hash.setAttribute("aria-hidden", "true");
+        hash.textContent = "#";
+        const subTitle = document.createElement("span");
+        subTitle.className = "truncate";
+        subTitle.textContent = subResult.title;
+        subLink.append(hash, subTitle);
+        subContainer.append(subLink);
+      }
+      item.append(subContainer);
+    }
+
+    return item;
+  }
+
+  async function search(query: string): Promise<void> {
+    const sequence = ++searchSequence;
+    if (!resultsList || !emptyBox) return;
+
+    if (!query) {
+      renderInitialState();
+      return;
+    }
+
+    emptyBox.hidden = true;
+    setStatus("Searching...");
+    try {
+      const pagefind = await getPagefind();
+      const options = scope === "product" && scopeSlug ? { filters: { product: scopeSlug } } : undefined;
+      const response = await pagefind.search(query, options);
+      const results = await Promise.all(response.results.map((result) => result.data()));
+      if (sequence !== searchSequence || modal?.hidden) return;
+      const items = results.map(createResultItem).filter((item): item is HTMLLIElement => item !== null);
+      resultsList.replaceChildren(...items);
+      resultsList.hidden = items.length === 0;
+      emptyBox.hidden = items.length > 0;
+      if (emptyBox && items.length === 0) {
+        emptyBox.textContent = `No results found for "${query}".`;
+      }
+      const countLabel = `${items.length} result${items.length === 1 ? "" : "s"}`;
+      setStatus(items.length ? countLabel : "No matching documentation found.", items.length ? countLabel : "");
+    } catch {
+      if (sequence !== searchSequence) return;
+      resultsList.replaceChildren();
+      resultsList.hidden = true;
+      emptyBox.hidden = false;
+      emptyBox.textContent = "Search index is generated during production build (npm run build).";
+      setStatus("Search index unavailable in current build.");
+    }
+  }
+
+  function setScope(nextScope: string): void {
+    scope = nextScope;
+    scopeButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.searchScope === scope));
+    });
+    const trimmed = input?.value.trim() || "";
+    if (trimmed) {
+      void search(trimmed);
+    } else {
+      renderInitialState();
+    }
+  }
+
+  function scheduleSearch(): void {
+    window.clearTimeout(debounceTimer);
+    if (clearButton) clearButton.hidden = !input?.value;
+    debounceTimer = window.setTimeout(() => {
+      if (input) void search(input.value.trim());
+    }, 120);
+  }
+
+  async function openModal(detail: SearchDetail = {}): Promise<void> {
+    if (!modal || !input) return;
+    const context = document.querySelector<HTMLElement>("[data-search-context]");
+    scopeSlug = detail.productSlug || context?.dataset.productSlug || "";
+    scopeTitle = detail.productTitle || context?.dataset.productTitle || "";
+    scope = scopeSlug ? "product" : "all";
+    if (scopeBar) scopeBar.hidden = !scopeSlug;
+    input.placeholder = scopeTitle ? `Search ${scopeTitle}...` : "Search documentation...";
+    scopeButtons.forEach((button) => {
+      if (button.dataset.searchScope === "product") {
+        button.textContent = scopeTitle || "Current Product";
+      }
+      button.setAttribute("aria-pressed", String(button.dataset.searchScope === scope));
+    });
+    if (clearButton) clearButton.hidden = !input.value;
+
+    lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (modal.hidden) {
+      const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+      originalBodyOverflow = document.body.style.overflow;
+      originalBodyPaddingRight = document.body.style.paddingRight;
+      document.body.style.overflow = "hidden";
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+      requestAnimationFrame(() => {
+        if (!modal.hidden) modal.dataset.state = "open";
+      });
+    }
+
+    input.focus();
+
+    if (input.value.trim()) {
+      void search(input.value.trim());
+    } else {
+      renderInitialState();
+      void getPagefind().catch(() => {});
+    }
+  }
+
+  function closeModal(): void {
+    const activeModal = modal;
+    if (!activeModal || activeModal.hidden) return;
+    activeModal.dataset.state = "closed";
+    activeModal.hidden = true;
+    activeModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = originalBodyOverflow;
+    document.body.style.paddingRight = originalBodyPaddingRight;
+    resultsList?.replaceChildren();
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("q")) {
+        url.searchParams.delete("q");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+      }
+    } catch {}
+    if (lastFocusedElement?.isConnected) lastFocusedElement.focus();
+  }
+
+  function getResultLinks(): HTMLAnchorElement[] {
+    return Array.from(resultsList?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? []);
+  }
+
+  window.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      const context = document.querySelector<HTMLElement>("[data-search-context]");
+      void openModal({ productSlug: context?.dataset.productSlug, productTitle: context?.dataset.productTitle });
+    } else if (event.key === "Escape" && modal && !modal.hidden) {
+      closeModal();
+    } else if ((event.key === "ArrowDown" || event.key === "ArrowUp") && modal && !modal.hidden) {
+      const links = getResultLinks();
+      if (!links.length) return;
+      event.preventDefault();
+      const currentIndex = links.indexOf(document.activeElement as HTMLAnchorElement);
+      if (event.key === "ArrowDown") {
+        const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % links.length;
+        links[nextIndex]?.focus();
+      } else {
+        if (currentIndex === 0 && input) {
+          input.focus();
+        } else {
+          const prevIndex = currentIndex <= 0 ? links.length - 1 : currentIndex - 1;
+          links[prevIndex]?.focus();
+        }
+      }
+    } else if (event.key === "Enter" && modal && !modal.hidden && document.activeElement === input) {
+      const links = getResultLinks();
+      if (links.length > 0) {
+        event.preventDefault();
+        links[0]?.click();
+      }
+    } else if (event.key === "Tab" && modal && !modal.hidden) {
+      const focusable = Array.from(modal.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled]), a[href]"))
+        .filter((element) => element.getClientRects().length > 0);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+  });
+
+  window.addEventListener("vib:open-search", (event) => {
+    const detail = (event as CustomEvent<SearchDetail | null>).detail ?? {};
+    void openModal(detail);
+  });
+
+  modal?.addEventListener("mousedown", (event) => {
+    if (palette && !palette.contains(event.target as Node)) closeModal();
+  });
+  closeButton?.addEventListener("click", closeModal);
+  input?.addEventListener("input", scheduleSearch);
+  clearButton?.addEventListener("click", () => {
+    if (!input) return;
+    input.value = "";
+    input.focus();
+    scheduleSearch();
+  });
+  scopeButtons.forEach((button) => {
+    button.addEventListener("click", () => setScope(button.dataset.searchScope ?? "all"));
+  });
+
+  function readInitialSearchQuery(): string {
+    try {
+      const raw = new URLSearchParams(window.location.search).get("q");
+      return raw ? raw.trim().slice(0, 120) : "";
+    } catch {
+      return "";
+    }
+  }
+
+  const initialQuery = readInitialSearchQuery();
+  if (initialQuery && input) {
+    input.value = initialQuery;
+    const context = document.querySelector<HTMLElement>("[data-search-context]");
+    void openModal({
+      productSlug: context?.dataset.productSlug,
+      productTitle: context?.dataset.productTitle,
+    });
+  }
+</script>

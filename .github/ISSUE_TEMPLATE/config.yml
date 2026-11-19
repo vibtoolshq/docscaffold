@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vib Docs Engine Documentation & .vibtools/ Schema
+    url: https://docs.vib.tools/vib-docs-engine/
+    about: Read the official operator guide, .vibtools/docs.config.json specification, and deployment runbooks.
+  - name: Security vulnerability reports (Private)
+    url: mailto:support@vibtools.io
+    about: Report suspected security vulnerabilities privately instead of opening a public issue.
+  - name: Product & Technical Support
+    url: mailto:support@vibtools.io
+    about: Contact Vib Tools support for product or technical assistance.
+  - name: General Inquiries & Partnerships
+    url: mailto:hello@vibtools.io
+    about: Contact Vib Tools for company, partnership, or press inquiries.

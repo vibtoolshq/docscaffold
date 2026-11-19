@@ -1,0 +1,67 @@
+---
+interface Props {
+  categories: string[];
+}
+
+const { categories } = Astro.props;
+const hasFilters = categories.length > 1;
+---
+
+{hasFilters && (
+  <div
+    class="flex flex-wrap items-center gap-1.5 border-b border-[var(--border-hairline)] pb-3"
+    role="group"
+    aria-label="Filter projects by category"
+    data-category-filters
+  >
+    <button
+      class="rounded-md border border-transparent bg-transparent px-2.5 py-1 text-xs font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] data-[active=true]:border-[var(--accent-color)] data-[active=true]:bg-[color-mix(in_srgb,var(--accent-color)_12%,var(--bg-surface))] data-[active=true]:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]"
+      type="button"
+      data-category-filter=""
+      data-active="true"
+      aria-pressed="true"
+    >
+      All
+    </button>
+    {categories.map((category) => (
+      <button
+        class="rounded-md border border-transparent px-2.5 py-1 text-xs font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] data-[active=true]:border-[var(--accent-color)] data-[active=true]:bg-[color-mix(in_srgb,var(--accent-color)_12%,var(--bg-surface))] data-[active=true]:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]"
+        type="button"
+        data-category-filter={category}
+        data-active="false"
+        aria-pressed="false"
+      >
+        {category}
+      </button>
+    ))}
+  </div>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-category-filters]").forEach((group) => {
+    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>("[data-category-filter]"));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-project-card]"));
+    const emptyState = document.querySelector<HTMLElement>("[data-filter-empty]");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const selectedCategory = button.dataset.categoryFilter ?? "";
+        let visibleCount = 0;
+
+        buttons.forEach((candidate) => {
+          const isActive = candidate === button;
+          candidate.dataset.active = String(isActive);
+          candidate.setAttribute("aria-pressed", String(isActive));
+        });
+
+        cards.forEach((card) => {
+          const isVisible = selectedCategory === "" || card.dataset.category === selectedCategory;
+          card.hidden = !isVisible;
+          if (isVisible) visibleCount += 1;
+        });
+
+        if (emptyState) emptyState.hidden = visibleCount > 0;
+      });
+    });
+  });
+</script>

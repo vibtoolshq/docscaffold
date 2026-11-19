@@ -1,0 +1,20 @@
+name: Notify documentation portal
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - ".vibtools/**"
+
+jobs:
+  notify-docs-portal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger documentation rebuild
+        env:
+          DOCS_DEPLOY_HOOK_URL: ${{ secrets.DOCS_DEPLOY_HOOK_URL }}
+        run: |
+          test -n "$DOCS_DEPLOY_HOOK_URL"
+          curl -fsSL -X POST "$DOCS_DEPLOY_HOOK_URL"

@@ -1,0 +1,114 @@
+---
+import { ArrowRight, ChevronRight, FileText, Search } from "lucide-astro";
+import manifest from "../generated/manifest.json";
+import CategoryTabs from "../components/hub/CategoryTabs.astro";
+import ProjectCard from "../components/hub/ProjectCard.astro";
+import HubLayout from "../layouts/HubLayout.astro";
+import type { ManifestProject, SiteConfig } from "../utils/manifest";
+import { buildQuickSuggestions } from "../utils/search";
+import { buildHubJsonLd } from "../utils/seo";
+
+const projects = manifest.projects as ManifestProject[];
+const primaryProject = projects[0];
+const quickGuides = buildQuickSuggestions(projects, 3);
+const hubJsonLd = buildHubJsonLd(manifest.site as SiteConfig);
+---
+
+<HubLayout site={manifest.site} projects={projects} structuredData={hubJsonLd}>
+  <main id="main-content" class="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6 lg:px-8">
+    <section class="border-b border-[var(--border-hairline)] py-7 sm:py-9" aria-labelledby="portal-title">
+      <div class={`grid grid-cols-1 items-start gap-6 ${quickGuides.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center" : ""}`}>
+        <div class="min-w-0">
+          <h1 id="portal-title" class="max-w-2xl text-2xl font-semibold leading-tight tracking-normal text-[var(--text-primary)] sm:text-[28px] [text-wrap:balance]">
+            {manifest.site.portalTitle}
+          </h1>
+          <p class="mt-2 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
+            {manifest.site.portalSubtitle}
+          </p>
+
+          <div class="mt-5 flex flex-wrap items-center gap-2.5">
+            {primaryProject && (
+              <a
+                href={`/${primaryProject.slug}/`}
+                class="inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-[var(--accent-color)] px-3.5 text-xs font-medium text-white no-underline transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]"
+              >
+                <span>Browse {primaryProject.title}</span>
+                <ArrowRight class="size-3.5 shrink-0" aria-hidden="true" />
+              </a>
+            )}
+
+            <button
+              type="button"
+              data-search-trigger
+              class="inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-3 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--text-muted)]/40 hover:bg-[var(--bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]"
+            >
+              <Search class="size-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
+              <span>Search docs</span>
+              <kbd class="hidden rounded border border-[var(--border-hairline)] bg-[var(--bg-canvas)] px-1.5 py-px font-mono text-[10px] leading-4 text-[var(--text-muted)] sm:inline-flex">Ctrl K</kbd>
+            </button>
+          </div>
+        </div>
+
+        {quickGuides.length > 0 && (
+          <aside class="rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-surface)]" aria-label="Quick guides">
+            <div class="flex items-center justify-between border-b border-[var(--border-hairline)] px-3.5 py-2">
+              <span class="text-xs font-medium text-[var(--text-primary)]">Quick Guides</span>
+              {primaryProject && (
+                <a
+                  href={`/${primaryProject.slug}/`}
+                  class="text-[11px] text-[var(--text-muted)] no-underline transition-colors hover:text-[var(--text-primary)]"
+                >
+                  View all
+                </a>
+              )}
+            </div>
+            <ul class="divide-y divide-[var(--border-hairline)]">
+              {quickGuides.map((guide) => (
+                <li>
+                  <a
+                    href={guide.route}
+                    class="group flex items-center justify-between gap-3 px-3.5 py-2.5 text-inherit no-underline transition-colors hover:bg-[var(--bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--accent-color)]"
+                  >
+                    <span class="flex min-w-0 items-center gap-2.5">
+                      <FileText class="size-3.5 shrink-0 text-[var(--text-muted)] transition-colors group-hover:text-[var(--accent-color)]" aria-hidden="true" />
+                      <span class="min-w-0">
+                        <span class="block truncate text-xs font-medium text-[var(--text-primary)]">{guide.title}</span>
+                        <span class="block truncate text-[11px] text-[var(--text-muted)]">{guide.breadcrumb}</span>
+                      </span>
+                    </span>
+                    <ChevronRight class="size-3.5 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--text-primary)]" aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+      </div>
+    </section>
+
+    <section class="py-7 sm:py-9" aria-labelledby="projects-heading">
+      <div class="mb-3 flex items-baseline justify-between gap-4">
+        <h2 id="projects-heading" class="text-sm font-medium text-[var(--text-primary)]">Documentation</h2>
+        <span class="text-xs tabular-nums text-[var(--text-muted)]">
+          {projects.length} {projects.length === 1 ? "project" : "projects"}
+        </span>
+      </div>
+
+      <CategoryTabs categories={manifest.categories} />
+
+      {projects.length > 0 ? (
+        <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project) => <ProjectCard project={project} />)}
+        </div>
+      ) : (
+        <p class="rounded-md border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-4 py-6 text-sm text-[var(--text-muted)]">
+          No documentation projects are available yet.
+        </p>
+      )}
+
+      <p class="mt-4 text-sm text-[var(--text-muted)]" data-filter-empty hidden role="status" aria-live="polite">
+        No projects match this category.
+      </p>
+    </section>
+  </main>
+</HubLayout>

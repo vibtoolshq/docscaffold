@@ -1,0 +1,43 @@
+---
+import { AlertCircle, AlertTriangle, Info, Lightbulb } from "lucide-astro";
+
+type CalloutType = "note" | "tip" | "warning" | "danger";
+
+interface Props {
+  type?: CalloutType;
+  title?: string;
+}
+
+const { type = "note", title } = Astro.props;
+const labels: Record<CalloutType, string> = {
+  note: "Note",
+  tip: "Tip",
+  warning: "Warning",
+  danger: "Danger",
+};
+const colors: Record<CalloutType, string> = {
+  note: "var(--accent-color)",
+  tip: "#16a34a",
+  warning: "#d97706",
+  danger: "#dc2626",
+};
+---
+
+<aside
+  class="my-4 rounded-md border border-[var(--border-hairline)] border-l-2 bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-[var(--text-muted)]"
+  style={`--callout-accent: ${colors[type]}; border-left-color: var(--callout-accent);`}
+  role={type === "warning" || type === "danger" ? "alert" : "note"}
+>
+  <div class="flex items-start gap-2.5">
+    <span class="mt-0.5 shrink-0 text-[var(--callout-accent)]" aria-hidden="true">
+      {type === "note" && <Info class="size-4" />}
+      {type === "tip" && <Lightbulb class="size-4" />}
+      {type === "warning" && <AlertTriangle class="size-4" />}
+      {type === "danger" && <AlertCircle class="size-4" />}
+    </span>
+    <div class="min-w-0">
+      <p class="mb-1 text-xs font-semibold text-[var(--text-primary)]">{title || labels[type]}</p>
+      <div class="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0"><slot /></div>
+    </div>
+  </div>
+</aside>

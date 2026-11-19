@@ -1,0 +1,16 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "docscaffold"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"
+
+# Cloudflare Pages & Functions Configuration
+# Build command: npm run build
+# Build output directory: dist
+#
+# Optional Environment Secrets (set in Cloudflare Pages Dashboard -> Settings -> Environment variables):
+# - GIT_TOKEN: Default personal access token / deploy token for private docs repositories
+# - GIT_USERNAME: Optional custom Git username (auto-detected as x-access-token or oauth2 when omitted)
+# - CF_DEPLOY_HOOK_URL: Optional Cloudflare Pages Deploy Hook URL (HTTPS) used by POST /api/webhook
+# - WEBHOOK_SECRET: Required when CF_DEPLOY_HOOK_URL is set (returns HTTP 501 unless ALLOW_UNAUTHENTICATED_WEBHOOK = "true")
+# - ALLOW_UNAUTHENTICATED_WEBHOOK: Set to "true" only for temporary local testing without WEBHOOK_SECRET
+# - ALLOWED_BRANCHES: Optional comma-separated branch allowlist for webhook pushes (e.g. "main,docs")

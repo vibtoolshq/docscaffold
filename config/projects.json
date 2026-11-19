@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "vib-docs-engine",
+    "category": "Documentation Engines",
+    "accentColor": "#7C3AED",
+    "repoUrl": "https://github.com/vibtoolshq/docscaffold.git",
+    "branch": "main",
+    "docsPath": "docs",
+    "ctaLabel": "View source",
+    "ctaUrl": "https://github.com/vibtoolshq/docscaffold",
+    "title": "DocScaffold",
+    "description": "Open-source static multi-repository documentation engine."
+  }
+]

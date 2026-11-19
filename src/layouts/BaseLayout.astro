@@ -1,0 +1,102 @@
+---
+import siteConfig from "../../config/site.config.json";
+import SearchModal from "../components/ui/SearchModal.astro";
+import "../styles/global.css";
+import { safeJsonLdStringify } from "../utils/seo";
+import { resolveAccentColor } from "../utils/theme";
+
+interface Props {
+  title: string;
+  description?: string;
+  accentColor?: string;
+  canonicalPath?: string;
+  ogType?: "website" | "article";
+  robots?: string;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  alternateLinks?: Array<{ type: string; title: string; href: string }>;
+}
+
+const {
+  title,
+  description = siteConfig.portalSubtitle,
+  accentColor,
+  canonicalPath,
+  ogType = "website",
+  robots,
+  structuredData,
+  alternateLinks = [],
+} = Astro.props;
+const pageTitle = title === siteConfig.portalTitle
+  ? title
+  : `${title} | ${siteConfig.portalTitle}`;
+const baseOrigin = /^https?:\/\//i.test(siteConfig.domain)
+  ? siteConfig.domain
+  : `https://${siteConfig.domain}`;
+const canonicalUrl = new URL(canonicalPath ?? Astro.url.pathname, baseOrigin).href;
+const ogImageUrl = new URL("/og-default.png", baseOrigin).href;
+const resolvedAccent = resolveAccentColor(accentColor, siteConfig.defaultAccent);
+---
+
+<!doctype html>
+<html lang="en" style={`--accent-color: ${resolvedAccent};`}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
+    <meta name="theme-color" content={siteConfig.defaultAccent} />
+    <meta name="apple-mobile-web-app-title" content={siteConfig.brandName} />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="/web-app-manifest-192x192.png" sizes="192x192" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/plain" title="LLMs Index" href="/llms.txt" />
+    <link rel="alternate" type="text/plain" title="LLMs Full Documentation" href="/llms-full.txt" />
+    <link rel="describedby" type="application/schema+json" title="VibTools Docs Config JSON Schema" href="/schemas/vibtools-docs.schema.json" />
+    {alternateLinks.map((alt) => (
+      <link rel="alternate" type={alt.type} title={alt.title} href={alt.href} />
+    ))}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={siteConfig.brandName} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={pageTitle} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    {structuredData && (
+      <script is:inline type="application/ld+json" set:html={safeJsonLdStringify(structuredData)} />
+    )}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        let theme = "dark";
+        try {
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme === "light" || savedTheme === "dark") theme = savedTheme;
+        } catch {}
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="sr-only fixed left-3 top-3 z-50 rounded border border-[var(--border-hairline)] bg-[var(--bg-surface)] px-3 py-2 text-[var(--text-primary)] focus:not-sr-only" href="#main-content">Skip to content</a>
+    <slot />
+    <SearchModal />
+  </body>
+</html>

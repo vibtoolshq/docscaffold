@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.env*
+.playwright-mcp/
+.playwright-cli/
+.aistudio/
+artifacts/
+bun.lock
+bun.lockb
+public/assets/aistudio/
+
+src/content/docs/*
+!src/content/docs/.gitkeep
+src/generated/*
+!src/generated/.gitkeep
+public/logos/*
+!public/logos/.gitkeep
+!public/logos/vib-tools.png
+
+# Local-only private docs and engineering artifacts
+config/projects.local.json
+config/private/
+private-docs/
+notes/
+project/
